@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 
-void start_server(int port, int maxbuf, char *(*cb)(), void (*on_start)())
+void start_server(int port, int maxbuf, char *(*calc_res)(), void (*on_start)())
 {
 	int listenfd = 0;
 	int connfd = 0;
@@ -15,6 +15,10 @@ void start_server(int port, int maxbuf, char *(*cb)(), void (*on_start)())
 	char sendBuff[maxbuf];
 	char receiveBuff[maxbuf];
 
+	// these immediate things may throw, but we would most
+	// certainly now on server startup
+	// once we get to the while we're safe
+	// (unless we get reqs over buff lim specified)
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	memset(&serv_addr, '0', sizeof(serv_addr));
 	memset(sendBuff, '0', sizeof(sendBuff));
@@ -38,7 +42,7 @@ void start_server(int port, int maxbuf, char *(*cb)(), void (*on_start)())
 		recv(connfd, receiveBuff, maxbuf, 0);
 
 		// calc res
-		char *res = (*cb)(receiveBuff);
+		char *res = (*calc_res)(receiveBuff);
 
 		// read res buffer to client
 		send(connfd, res, strlen(res), 0);
