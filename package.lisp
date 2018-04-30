@@ -2,4 +2,5 @@
 
 (defpackage #:basic-server
   (:use #:cl
-	#:cffi))
+	#:cffi)
+  (:export #:start-server))

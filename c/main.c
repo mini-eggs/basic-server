@@ -7,15 +7,8 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
-#include <time.h>
 
-typedef struct
-{
-	char *data;
-	int size;
-} SimpleResponse;
-
-int start(int port, int maxbuf, char *(*cb)())
+void start_server(int port, int maxbuf, char *(*cb)(), void (*on_start)())
 {
 	int listenfd = 0;
 	int connfd = 0;
@@ -36,30 +29,22 @@ int start(int port, int maxbuf, char *(*cb)())
 
 	listen(listenfd, 10);
 
+	// client cb
+	(*on_start)();
+
 	while (1)
 	{
 		connfd = accept(listenfd, (struct sockaddr *)NULL, NULL);
 
+		// read client req into buffer
 		recv(connfd, receiveBuff, maxbuf, 0);
 
-		SimpleResponse res;
-		res.data = (*cb)(receiveBuff);
-		res.size = strlen(res.data);
+		// calc res
+		char *res = (*cb)(receiveBuff);
 
-		send(connfd, res.data, res.size, 0);
+		// read res buffer to client
+		send(connfd, res, strlen(res), 0);
 		close(connfd);
+		free(res);
 	}
 }
-
-// char *callback(char *buf)
-// {
-// 	printf("%s", buf);
-// 	return "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nVary: Accept-Encoding\r\n\r\n<h1>Wow2!</h1>";
-// }
-
-// int main(int argc, char *argv[])
-// {
-// 	char *(*cb)() = &callback;
-// 	start(5002, 1024, cb);
-// 	return 0;
-// };
