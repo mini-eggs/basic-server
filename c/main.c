@@ -4,9 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
-#include <sys/types.h>
 
 void start_server(int port, int maxbuf, char *(*cb)(), void (*on_start)())
 {
